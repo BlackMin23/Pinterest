@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Pinterest Firebase</string>
+    <string name="cancelar">CANCELAR</string>
+    <string name="sin_cuenta_registrar">¿No tienes una cuenta? Regístrate aquí</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="correo_electronico">Correo electrónico</string>
+    <string name="bienvenido">Bienvenido</string>
+    <string name="crear_nueva_cuenta">Crear Nueva Cuenta</string>
+    <string name="contraseña">Contraseña</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="first_name">Nombre</string>
+    <string name="last_name">Apellido</string>
+    <string name="ya_tienes_una_cuenta">¿Ya tienes una cuenta? Inicia sesión</string>
+    <string name="confirmar_contraseña">Confirmar Contraseña</string>
+    <string name="cerrar_sesion">Cerrar Sesión</string>
+    <string name="crea_la_vida_que_deseas_en_pinterest">Crea la vida que deseas en Pinterest</string>
+    <string name="p_vender">Publicar un producto que quieres vender</string>
+    <string name="p_normal">Publicar una imagen para que todos la puedan ver</string>
+    <string name="ir_perfil">Ir al Perfil</string>
+    <string name="agregar_descripcion">Agregar descripcion</string>
+    <string name="agregar_nombre">Agregar nombre</string>
+    <string name="agregar_imagen">Agregar imagen</string>
+    <string name="publicaciones">Mis Publicaciones</string>
+    <string name="volver">Volver</string>
+    <string name="agregar">Agregar</string>
+    <string name="publicar">Publicar</string>
+    <string name="nombre_de_la_publicacion">Nombre de la publicacion</string>
+    <string name="descripcion">Descripcion</string>
+    <string name="Nombre_Usuario">Nombre</string>
+    <string name="Apellidos">Apellidos</string>
+    <string name="editar_publicacion_normal">Editar publicacion normal</string>
+    <string name="eliminar_publicacion_normal">Eliminar publicacion normal</string>
+    <string name="agregar_publicaciones">Agregar Publicaciones</string>
+    <string name="subir">Subir</string>
+    <string name="perfil">Perfil</string>
+    <string name="editar">Editar</string>
+    <string name="Ingresa_nombre">Nombre</string>
+
+</resources>
