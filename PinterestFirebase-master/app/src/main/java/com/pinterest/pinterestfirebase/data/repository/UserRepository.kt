@@ -3,122 +3,58 @@ package com.pinterest.pinterestfirebase.data.repository
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.pinterest.pinterestfirebase.data.model.Usuarios
-import java.io.File
+import kotlinx.coroutines.tasks.await
 
-class UserRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val mascotasRef = db.collection("users")
+class UserRepository() {
 
-    // Crear libro
-    fun agregarLibro(mascota: Usuarios, imagenUri: Uri?, onComplete: (Boolean) -> Unit) {
-        try {
-            // Si viene con ID → editar, si no → crear nuevo documento
-            val docRef = if (mascota.id.isNotEmpty()) {
-                mascotasRef.document(mascota.id)
-            } else {
-                mascotasRef.document()
-            }
+    suspend fun actualizarCuenta(email: String, firstName: String, lastName: String, imageUrl: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+            ?: throw Exception("No hay usuario autenticado")
 
-            // UID del usuario actual
-            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        // Actualiza nombre completo e imagen
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName("$firstName $lastName")
+            .setPhotoUri(Uri.parse(imageUrl))
+            .build()
 
-            // Solo asignar nuevo ID si estamos creando un nuevo libro
-            val libroActualizado = if (mascota.id.isNotEmpty()) {
-                mascota
-            } else {
-                mascota.copy(id = docRef.id)
-            }
+        user.updateProfile(profileUpdates).await()
 
-            // ✅ Agregar el usuarioId
-            val libroConUsuario = libroActualizado.copy(id = uid)
-
-            docRef.set(libroConUsuario)
-                .addOnSuccessListener { onComplete(true) }
-                .addOnFailureListener { onComplete(false) }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            onComplete(false)
+        // (Opcional) Si también quieres actualizar el email
+        if (user.email != email) {
+            user.updateEmail(email).await()
         }
+
+        Log.d("ActualizarCuenta", "Perfil actualizado correctamente")
     }
 
-    // Obtener todos los libros
-    fun obtenerLibros(onResult: (List<Usuarios>) -> Unit) {
-        mascotasRef.get().addOnSuccessListener { snapshot ->
-            val lista = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(Usuarios::class.java)?.copy(id = doc.id)
-            }
-            onResult(lista)
-        }
-    }
-
-    // Actualizar libro
-    fun actualizarLibro(mascota: Usuarios, onComplete: (Boolean) -> Unit) {
-        mascotasRef.document(mascota.id).set(mascota)
-            .addOnSuccessListener { onComplete(true) }
-            .addOnFailureListener { onComplete(false) }
-    }
-
-    // Eliminar libro
-    fun eliminarLibro(id: String, onComplete: (Boolean) -> Unit) {
-        mascotasRef.document(id).get().addOnSuccessListener { doc ->
-            val mascota = doc.toObject(Usuarios::class.java)
-
-            // 🔁 Borra la imagen local si existe
-            mascota?.imagenUrl?.let { ruta ->
-                try {
-                    val archivo = File(ruta)
-                    if (archivo.exists()) {
-                        archivo.delete()
-                        Log.d("FirebaseRepo", "Imagen local eliminada: $ruta")
-                    } else {
-                        Log.d("FirebaseRepo", "No se encontró la imagen en: $ruta")
-                    }
-                } catch (e: Exception) {
-                    Log.e("FirebaseRepo", "Error al borrar la imagen local", e)
-                }
-            }
-
-            // 🔥 Luego elimina el documento de Firestore
-            mascotasRef.document(id).delete()
-                .addOnSuccessListener {
-                    Log.d("FirebaseRepo", "Libro eliminado con éxito: $id")
-                    onComplete(true)
-                }
-                .addOnFailureListener { ex ->
-                    Log.e("FirebaseRepo", "Error al eliminar libro en Firestore", ex)
-                    onComplete(false)
-                }
-
-        }.addOnFailureListener { ex ->
-            Log.e("FirebaseRepo", "Error al obtener el documento antes de eliminar", ex)
-            onComplete(false)
-        }
-    }
 
     fun obtenerUsuarioActual(onResult: (Usuarios?) -> Unit) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val user = FirebaseAuth.getInstance().currentUser
+        val uid = user?.uid
+        val partes = user?.displayName?.trim()?.split(" ")
+
+        val apellidoPaterno = partes?.getOrNull(0) ?: ""
+        val apellidoMaterno = partes?.getOrNull(1) ?: ""
 
         if (uid == null) {
             onResult(null) // No hay usuario logueado
             return
         }
 
-        mascotasRef.document(uid).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val usuario = document.toObject(Usuarios::class.java)?.copy(id = document.id)
-                    onResult(usuario)
-                } else {
-                    onResult(null) // Documento no encontrado
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("UserRepository", "Error al obtener usuario: ${exception.message}")
-                onResult(null)
-            }
+        if(user != null){
+            val usuario: Usuarios = Usuarios()
+            usuario.imagenUrl = user.photoUrl.toString()
+            usuario.email = user.email.toString()
+            usuario.firstName = apellidoPaterno
+            usuario.lastName = apellidoMaterno
+
+            onResult(usuario)
+        }
+
+        onResult(null)
+
     }
 
 }

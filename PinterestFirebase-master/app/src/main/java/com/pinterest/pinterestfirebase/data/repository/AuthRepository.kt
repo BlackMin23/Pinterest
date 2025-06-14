@@ -2,6 +2,7 @@ package com.pinterest.pinterestfirebase.data.repository
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -19,22 +20,32 @@ class AuthRepository(
     suspend fun registerUser(email: String, password: String, firstName: String, lastName: String,ImageUrl: String ): Result<Boolean> {
         return try {
             // Crea el usuario solo con email y contraseña
+
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            val user = authResult.user
+            val user = authResult.user?: throw Exception("Usuario no creado")
+
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName("$firstName $lastName")
+                .setPhotoUri(Uri.parse(ImageUrl))
+                .build()
+
+            user.updateProfile(profileUpdates).await()
+
+
 
             // Si el usuario se creó correctamente, guarda información adicional en Firestore
-            user?.let { firebaseUser ->
-                val userData = hashMapOf(
-                    "email" to firebaseUser.email,
-                    "firstName" to firstName,
-                    "lastName" to lastName,
-                    "imagenUrl" to ImageUrl,
-                    "createdAt" to System.currentTimeMillis()
-                    // Puedes añadir más campos de perfil aquí si es necesario
-                )
-                // Guarda el UID del usuario como ID del documento en la colección 'users'
-                firestore.collection("users").document(firebaseUser.uid).set(userData).await()
-            }
+//            user?.let { firebaseUser ->
+//                val userData = hashMapOf(
+//                    "email" to firebaseUser.email,
+//                    "firstName" to firstName,
+//                    "lastName" to lastName,
+//                    "imagenUrl" to ImageUrl,
+//                    "createdAt" to System.currentTimeMillis()
+//                    // Puedes añadir más campos de perfil aquí si es necesario
+//                )
+//                // Guarda el UID del usuario como ID del documento en la colección 'users'
+//                firestore.collection("users").document(firebaseUser.uid).set(userData).await()
+//            }
             Result.success(true) // Registro exitoso
         } catch (e: Exception) {
             e.printStackTrace()

@@ -16,6 +16,6 @@ class ProfileViewModel() : ViewModel() {
     private val repository = UserRepository()
 
     fun agregarMascota(mascota: Usuarios, imagenUri: Uri?, onResult: (Boolean) -> Unit) {
-        repository.agregarLibro(mascota, imagenUri, onResult)
+//        repository.agregarLibro(mascota, imagenUri, onResult)
     }
 }
