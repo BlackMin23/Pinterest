@@ -9,8 +9,7 @@ import java.io.File
 
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance().reference
-    private val mascotasRef = db.collection("mascotas")
+    private val mascotasRef = db.collection("users")
 
     // Crear libro
     fun agregarLibro(mascota: Usuarios, imagenUri: Uri?, onComplete: (Boolean) -> Unit) {
@@ -33,7 +32,7 @@ class UserRepository {
             }
 
             // ✅ Agregar el usuarioId
-            val libroConUsuario = libroActualizado.copy(ownerId = uid)
+            val libroConUsuario = libroActualizado.copy(id = uid)
 
             docRef.set(libroConUsuario)
                 .addOnSuccessListener { onComplete(true) }
@@ -45,21 +44,18 @@ class UserRepository {
         }
     }
 
-
-
-
     // Obtener todos los libros
-    fun obtenerLibros(onResult: (List<Mascota>) -> Unit) {
+    fun obtenerLibros(onResult: (List<Usuarios>) -> Unit) {
         mascotasRef.get().addOnSuccessListener { snapshot ->
             val lista = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(Mascota::class.java)?.copy(id = doc.id)
+                doc.toObject(Usuarios::class.java)?.copy(id = doc.id)
             }
             onResult(lista)
         }
     }
 
     // Actualizar libro
-    fun actualizarLibro(mascota: Mascota, onComplete: (Boolean) -> Unit) {
+    fun actualizarLibro(mascota: Usuarios, onComplete: (Boolean) -> Unit) {
         mascotasRef.document(mascota.id).set(mascota)
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
@@ -68,7 +64,7 @@ class UserRepository {
     // Eliminar libro
     fun eliminarLibro(id: String, onComplete: (Boolean) -> Unit) {
         mascotasRef.document(id).get().addOnSuccessListener { doc ->
-            val mascota = doc.toObject(Mascota::class.java)
+            val mascota = doc.toObject(Usuarios::class.java)
 
             // 🔁 Borra la imagen local si existe
             mascota?.imagenUrl?.let { ruta ->
@@ -101,4 +97,28 @@ class UserRepository {
             onComplete(false)
         }
     }
+
+    fun obtenerUsuarioActual(onResult: (Usuarios?) -> Unit) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (uid == null) {
+            onResult(null) // No hay usuario logueado
+            return
+        }
+
+        mascotasRef.document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val usuario = document.toObject(Usuarios::class.java)?.copy(id = document.id)
+                    onResult(usuario)
+                } else {
+                    onResult(null) // Documento no encontrado
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("UserRepository", "Error al obtener usuario: ${exception.message}")
+                onResult(null)
+            }
+    }
+
 }

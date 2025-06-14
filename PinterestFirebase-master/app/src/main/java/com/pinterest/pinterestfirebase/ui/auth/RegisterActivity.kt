@@ -1,9 +1,12 @@
 package com.pinterest.pinterestfirebase.ui.auth
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,11 +17,24 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.pinterest.pinterestfirebase.data.repository.AuthRepository
 import com.pinterest.pinterestfirebase.databinding.ActivityRegisterBinding
 import com.pinterest.pinterestfirebase.ui.publicacion.PubliNListActivity
+import com.pinterest.pinterestfirebase.R
+import java.io.File
+import java.io.FileOutputStream
 
 class RegisterActivity : AppCompatActivity() {
+    private lateinit var imgPreview: ImageView
+    private var imagenUri: Uri? = null
+
+    private val seleccionarImagenLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            imagenUri = uri
+            imgPreview.setImageURI(uri)
+        }
+    }
 
     private lateinit var binding: ActivityRegisterBinding
-
     private lateinit var registerViewModel: RegisterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +43,8 @@ class RegisterActivity : AppCompatActivity() {
 
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        imgPreview = binding.imagePreview
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -57,6 +75,10 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnSelectImage.setOnClickListener {
+            seleccionarImagenLauncher.launch("image/*")
+        }
+
 
         // Configura el listener para el botón de registro
 
@@ -68,6 +90,8 @@ class RegisterActivity : AppCompatActivity() {
             // Agrega estos dos campos para firstName y lastName
             val firstName = binding.etFirstName.text.toString().trim()  // Asegúrate de que este EditText existe en tu layout
             val lastName = binding.etLastName.text.toString().trim()    // Asegúrate de que este EditText existe en tu layout
+            val rutaImagenLocal = imagenUri?.let { guardarImagenLocal(it) }
+
 
             // Actualiza la validación para incluir los nuevos campos
             if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() ||
@@ -95,8 +119,13 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (rutaImagenLocal == null) {
+                return@setOnClickListener
+            }
+
+
             // Ahora pasa todos los parámetros al ViewModel
-            registerViewModel.register(email, password, firstName, lastName)
+            registerViewModel.register(email, password, firstName, lastName, rutaImagenLocal )
         }
 
 
@@ -117,6 +146,24 @@ class RegisterActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish() // Finaliza esta actividad
+    }
+
+    private fun guardarImagenLocal(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val fileName = "users_${System.currentTimeMillis()}.jpg"
+            val file = File(filesDir, fileName)
+            val outputStream = FileOutputStream(file)
+
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
 }

@@ -18,10 +18,10 @@ class RegisterViewModel(private val authRepository: AuthRepository) : ViewModel(
      * @param email El correo electrónico del usuario.
      * @param password La contraseña del usuario.
      */
-    fun register(email: String, password: String, firstName: String, lastName: String) {
+    fun register(email: String, password: String, firstName: String, lastName: String, imageUrl: String) {
         // Lanzamos una corrutina en el ámbito del ViewModel
         viewModelScope.launch {
-            val result = authRepository.registerUser(email, password, firstName, lastName)
+            val result = authRepository.registerUser(email, password, firstName, lastName,imageUrl )
             _registerResult.postValue(result) // Publica el resultado en el LiveData
         }
     }

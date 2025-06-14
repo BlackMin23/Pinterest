@@ -16,7 +16,7 @@ class AuthRepository(
      * @param password La contraseña del usuario.
      * @return Un objeto Result<Boolean> que indica éxito o fracaso.
      */
-    suspend fun registerUser(email: String, password: String, firstName: String, lastName: String): Result<Boolean> {
+    suspend fun registerUser(email: String, password: String, firstName: String, lastName: String,ImageUrl: String ): Result<Boolean> {
         return try {
             // Crea el usuario solo con email y contraseña
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -28,6 +28,7 @@ class AuthRepository(
                     "email" to firebaseUser.email,
                     "firstName" to firstName,
                     "lastName" to lastName,
+                    "imagenUrl" to ImageUrl,
                     "createdAt" to System.currentTimeMillis()
                     // Puedes añadir más campos de perfil aquí si es necesario
                 )

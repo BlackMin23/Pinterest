@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.Perfil.ProfileActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
@@ -35,7 +36,7 @@
         app:layout_constraintStart_toEndOf="@id/btn_back"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <View
+    <ImageView
         android:id="@+id/profile_image"
         android:layout_width="120dp"
         android:layout_height="120dp"
@@ -45,18 +46,6 @@
         app:layout_constraintTop_toBottomOf="@id/tv_perfil"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Letra del usuario -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:textSize="48sp"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toTopOf="@id/profile_image"
-        app:layout_constraintBottom_toBottomOf="@id/profile_image"
-        app:layout_constraintStart_toStartOf="@id/profile_image"
-        app:layout_constraintEnd_toEndOf="@id/profile_image" />
 
     <!-- Botón editar -->
     <Button
@@ -88,9 +77,6 @@
         android:layout_margin="16dp"/>
 
 
-    <!-- Botones secundarios -->
-
-    <!-- Botón cerrar sesión -->
     <EditText
         android:id="@+id/et_nombre"
         android:layout_width="0dp"

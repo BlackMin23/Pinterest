@@ -22,6 +22,7 @@ import com.pinterest.pinterestfirebase.data.model.PublicacionN
 import com.pinterest.pinterestfirebase.data.repository.AuthRepository
 import com.pinterest.pinterestfirebase.data.repository.PubliNRepository
 import com.pinterest.pinterestfirebase.databinding.ActivityPubliNlistBinding
+import com.pinterest.pinterestfirebase.ui.Perfil.ProfileActivity
 import com.pinterest.pinterestfirebase.ui.auth.LoginActivity
 
 class PubliNListActivity : AppCompatActivity() {
@@ -167,6 +168,27 @@ class PubliNListActivity : AppCompatActivity() {
             Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
             navigateToLogin()
         }
+
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Acción al presionar "Inicio"
+                    true
+                }
+                R.id.nav_add -> {
+                    startActivity(Intent(this, ElegirTipoActivity::class.java))
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+
 
         // Configura botón para ir a la vista de agregar
         //Proximo boton para ir a la vista del foro
